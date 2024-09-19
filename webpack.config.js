@@ -131,6 +131,17 @@ var options = {
     extensions: fileExtensions
       .map((extension) => '.' + extension)
       .concat(['.js', '.jsx', '.ts', '.tsx', '.css']),
+    fallback: {
+      crypto: false,
+      https: false,
+      url: false,
+      path: false,
+      os: false,
+      zlib: false,
+      http: false,
+      buffer: require.resolve('buffer'),
+      process: require.resolve('process/browser'),
+    },
   },
   plugins: [
     isDevelopment && new ReactRefreshWebpackPlugin(),
@@ -138,6 +149,12 @@ var options = {
     new webpack.ProgressPlugin(),
     // expose and write the allowed env vars on the compiled bundle
     new webpack.EnvironmentPlugin(['NODE_ENV']),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
     new CopyWebpackPlugin({
       patterns: [
         {
