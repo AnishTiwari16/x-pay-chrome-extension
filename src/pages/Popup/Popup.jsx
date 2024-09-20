@@ -19,22 +19,6 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [isFullPage, setIsFullPage] = useState(false);
 
-  const sendMessageToContentScript = () => {
-    // Get the currently active tab
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length > 0) {
-        // Send a message to the content script in the active tab
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { action: 'yourAction', data: 'yourData' },
-          (response) => {
-            console.log(response);
-          }
-        );
-      }
-    });
-  };
-
   useEffect(() => {
     const init = async () => {
       try {
@@ -62,7 +46,6 @@ function App() {
         const openloginAdapter = new OpenloginAdapter({});
         web3auth.configureAdapter(openloginAdapter);
         setWeb3auth(web3auth);
-        sendMessageToContentScript();
         await web3auth.init();
         setProvider(web3auth.provider);
         if (web3auth.connected) {
@@ -73,7 +56,10 @@ function App() {
             // Send a message to the content script in the active tab
             chrome.tabs.sendMessage(
               tabs[0].id,
-              { action: 'yourAction', data: web3auth },
+              {
+                action: 'yourAction',
+                data: { web3auth, provider: web3auth.provider },
+              },
               (response) => {
                 console.log(response);
               }
@@ -257,7 +243,7 @@ function App() {
     <>
       {!isFullPage ? (
         <button
-          onClick={() => chrome.tabs.create({ url: 'index.html' })}
+          onClick={() => chrome.tabs.create({ url: 'popup.html' })}
           className="card login"
         >
           Login
