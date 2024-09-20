@@ -64,22 +64,29 @@ function App() {
         setWeb3auth(web3auth);
         sendMessageToContentScript();
         await web3auth.init();
-        setProvider(web3auth.provider);
+        const provider = web3auth.provider;
+        setProvider(provider);
         if (web3auth.connected) {
+          const rpc = new RPC(provider);
+          const privateKey = await rpc.getPrivateKey();
+          console.log(privateKey, 'prie', rpc);
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs.length > 0) {
+              // Send a message to the content script in the active tab
+              chrome.tabs.sendMessage(
+                tabs[0].id,
+                {
+                  action: 'yourAction',
+                  data: { pk: privateKey },
+                },
+                (response) => {
+                  console.log(response);
+                }
+              );
+            }
+          });
           setLoggedIn(true);
         }
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          if (tabs.length > 0) {
-            // Send a message to the content script in the active tab
-            chrome.tabs.sendMessage(
-              tabs[0].id,
-              { action: 'yourAction', data: web3auth },
-              (response) => {
-                console.log(response);
-              }
-            );
-          }
-        });
       } catch (error) {
         console.error(error);
       }
@@ -181,15 +188,15 @@ function App() {
     uiConsole(signedMessage);
   };
 
-  // const getPrivateKey = async () => {
-  // 	if (!provider) {
-  // 		uiConsole('provider not initialized yet');
-  // 		return;
-  // 	}
-  // 	const rpc = new RPC(provider);
-  // 	const privateKey = await rpc.getPrivateKey();
-  // 	uiConsole(privateKey);
-  // };
+  const getPrivateKey = async () => {
+    if (!provider) {
+      uiConsole('provider not initialized yet');
+      return;
+    }
+    const rpc = new RPC(provider);
+    const privateKey = await rpc.getPrivateKey();
+    uiConsole(privateKey);
+  };
 
   function uiConsole(...args) {
     const el = document.querySelector('#console>p');
@@ -212,7 +219,7 @@ function App() {
           </button>
         </div>
         <div>
-          <button onClick={getChainId} className="card">
+          <button onClick={getPrivateKey} className="card">
             Get Chain ID
           </button>
         </div>
@@ -257,7 +264,7 @@ function App() {
     <>
       {!isFullPage ? (
         <button
-          onClick={() => chrome.tabs.create({ url: 'index.html' })}
+          onClick={() => chrome.tabs.create({ url: 'popup.html' })}
           className="card login"
         >
           Login
