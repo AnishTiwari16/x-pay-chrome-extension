@@ -12,7 +12,10 @@ interface Message {
 function ChatBot({ close }: { close: () => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const handleSend = async (e: React.FormEvent<HTMLFormElement>) => {
+    setMessages((prev) => [...prev, { text: 'Getting Data...', sender: 'ai' }]);
+    setLoading(true);
     e.preventDefault();
     if (!input.trim()) return;
 
@@ -25,7 +28,7 @@ function ChatBot({ close }: { close: () => void }) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer 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`,
+            Authorization: `Bearer `,
           },
           body: JSON.stringify({
             messages: [
@@ -42,24 +45,26 @@ function ChatBot({ close }: { close: () => void }) {
 
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
-
+      setInput('');
       setMessages((prev) => [
         ...prev,
         { text: data?.choices[0]?.message?.content, sender: 'ai' },
       ]);
+      setLoading(false);
     } catch (error: any) {
       setMessages((prev) => [
         ...prev,
         { text: `Error: ${error.message}`, sender: 'ai' },
       ]);
+      setLoading(false);
+      setInput('');
     }
-    setInput('');
   };
   const fetchApi = async () => {
     try {
       setMessages((prev) => [
         ...prev,
-        { text: 'Getting Betting Stats...', sender: 'ai' },
+        { text: 'Getting Data...', sender: 'ai' },
       ]);
       const response = await fetch(
         'https://api.openai.com/v1/chat/completions',
@@ -67,7 +72,7 @@ function ChatBot({ close }: { close: () => void }) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer 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`,
+            Authorization: `Bearer `,
           },
           body: JSON.stringify({
             messages: [
@@ -126,7 +131,6 @@ function ChatBot({ close }: { close: () => void }) {
             </div>
             <div>16:15 CEST</div>
             <div className="box-1-style">
-              {' '}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -166,9 +170,30 @@ function ChatBot({ close }: { close: () => void }) {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Message..."
           />
-          <button type="submit" className="btn-styles">
-            Send
-          </button>
+
+          {loading ? (
+            <div className="loader-class">
+              <span className="loader"></span>
+            </div>
+          ) : (
+            <button type="submit" className="btn-styles">
+              <div style={{ cursor: 'pointer' }}>Send</div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                style={{ width: '25px', height: '25px' }}
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+                />
+              </svg>
+            </button>
+          )}
         </form>
         <div className="btn-close" onClick={() => close()}>
           <svg

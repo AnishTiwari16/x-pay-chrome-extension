@@ -11,22 +11,14 @@ const observer = new MutationObserver((mutations) => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         let render = false;
         const element = node;
-        const postId = currentURL.split('status')[1].replace('/', '');
+
         const spans = element.querySelectorAll('span');
-        const timeElements = element.querySelectorAll('time');
-        timeElements.forEach((timeElement) => {
-          const parentElement = timeElement.parentElement;
-          if (parentElement.tagName.toLowerCase() === 'a') {
-            const href = parentElement.getAttribute('href');
-            const urlFromHref = href.split('status')[1].replace('/', '');
-            if (urlFromHref === postId) {
-              render = true;
-            }
-          }
-        });
+
         spans.forEach((span) => {
-          if (spanPattern.test(span.textContent || '')) {
+          if (span.textContent.includes('AGX')) {
+            render = true;
             const shadowRoot = span;
+
             createRoot(shadowRoot).render(<App render={render} />);
           }
         });
