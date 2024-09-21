@@ -1,8 +1,8 @@
 import { JsonRpcProvider, Wallet } from 'ethers';
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-
-const Modal = ({ onClose, children }) => {
+import ChatBot from '../../ChatBot/index';
+const Modal = ({ onClose }) => {
   const modalRoot = document.body;
 
   const handleBackdropClick = useCallback(
@@ -14,55 +14,10 @@ const Modal = ({ onClose, children }) => {
     [onClose]
   );
 
-  const modalContent = (
-    <div
-      onClick={handleBackdropClick}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 999999,
-        overflow: 'auto',
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: 'white',
-          padding: '20px',
-          borderRadius: '10px',
-          position: 'relative',
-          maxWidth: '90%',
-          maxHeight: '90%',
-          overflow: 'auto',
-          margin: '5% auto',
-        }}
-      >
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '10px',
-            right: '10px',
-            background: 'none',
-            border: 'none',
-            fontSize: '18px',
-            cursor: 'pointer',
-          }}
-        >
-          &times;
-        </button>
-        {children}
-      </div>
-    </div>
+  return ReactDOM.createPortal(
+    <ChatBot close={handleBackdropClick} />,
+    modalRoot
   );
-
-  return ReactDOM.createPortal(modalContent, modalRoot);
 };
 
 const BeautifulButton = ({ onClick, children }) => (
@@ -164,12 +119,7 @@ const App = ({ render }) => {
         <BeautifulButton onClick={openModal}>Bettable</BeautifulButton>
       )}
       Hello from chrome
-      {isModalOpen && (
-        <Modal onClose={closeModal}>
-          <h2>Modal Content</h2>
-          <p>This is the full-screen modal content.</p>
-        </Modal>
-      )}
+      {isModalOpen && <Modal onClose={closeModal} />}
     </div>
   );
 };
