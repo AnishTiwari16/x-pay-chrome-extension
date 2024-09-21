@@ -6,24 +6,19 @@ const App = () => {
 
   useEffect(() => {
     const messageListener = async (message, sender, sendResponse) => {
-      console.log(message);
       if (message.action === 'yourAction') {
-        // Update state with the received message data
-        console.log('Message received:', message.data);
         if (message.data.pk) {
           let initialWallet = new Wallet(message.data.pk);
           const provider = new JsonRpcProvider('https://rpc.ankr.com/eth');
           let signer = initialWallet.connect(provider);
           setSigner(signer);
         }
-        // Send a response back to the sender
         sendResponse({ result: 'Message received' });
       }
     };
 
     chrome.runtime.onMessage.addListener(messageListener);
 
-    // Cleanup function
     return () => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };
