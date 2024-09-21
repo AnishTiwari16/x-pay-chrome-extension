@@ -1,7 +1,112 @@
 import { JsonRpcProvider, Wallet } from 'ethers';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 
-const App = () => {
+const Modal = ({ onClose, children }) => {
+  const modalRoot = document.body;
+
+  const handleBackdropClick = useCallback(
+    (event) => {
+      if (event.target === event.currentTarget) {
+        onClose();
+      }
+    },
+    [onClose]
+  );
+
+  const modalContent = (
+    <div
+      onClick={handleBackdropClick}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 999999,
+        overflow: 'auto',
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: 'white',
+          padding: '20px',
+          borderRadius: '10px',
+          position: 'relative',
+          maxWidth: '90%',
+          maxHeight: '90%',
+          overflow: 'auto',
+          margin: '5% auto',
+        }}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: 'none',
+            border: 'none',
+            fontSize: '18px',
+            cursor: 'pointer',
+          }}
+        >
+          &times;
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+
+  return ReactDOM.createPortal(modalContent, modalRoot);
+};
+
+const BeautifulButton = ({ onClick, children }) => (
+  <button
+    onClick={onClick}
+    style={{
+      width: '120px',
+      height: '40px',
+      backgroundColor: '#4CAF50',
+      color: 'white',
+      border: 'none',
+      borderRadius: '20px',
+      fontSize: '16px',
+      fontWeight: 'bold',
+      display: 'flex',
+      cursor: 'pointer',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      transition: 'all 0.3s ease',
+      position: 'absolute',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      top: '-50px',
+      right: '20px',
+    }}
+    onMouseEnter={(e) => {
+      e.target.style.backgroundColor = '#45a049';
+      e.target.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.2)';
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.backgroundColor = '#4CAF50';
+      e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+    }}
+  >
+    {children}
+  </button>
+);
+
+const App = ({ render }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = useCallback(() => setIsModalOpen(true), []);
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
+
   const [signer, setSigner] = useState(null);
 
   useEffect(() => {
@@ -54,13 +159,16 @@ const App = () => {
   };
 
   return (
-    <div style={{ color: '#fff' }}>
-      App
-      {signer && (
-        <div>
-          <h2>Sign Message</h2>
-          <button onClick={signMessage}> Sign Message </button>
-        </div>
+    <div style={{ color: '#fff', position: 'relative' }}>
+      {render && (
+        <BeautifulButton onClick={openModal}>Bettable</BeautifulButton>
+      )}
+      Hello from chrome
+      {isModalOpen && (
+        <Modal onClose={closeModal}>
+          <h2>Modal Content</h2>
+          <p>This is the full-screen modal content.</p>
+        </Modal>
       )}
     </div>
   );
