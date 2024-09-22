@@ -280,7 +280,25 @@ function App() {
   return (
     <div className="container">
       <h1 className="title">Agent X Extension</h1>
-
+      <div
+        style={{
+          whiteSpace: 'pre-line',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: '20px',
+        }}
+      >
+        <img
+          src="https://cryptologos.cc/logos/ethereum-eth-logo.png"
+          alt="Ethereum"
+          width={'50px'}
+          height={'50px'}
+        />
+        <p className="username" style={{ whiteSpace: 'pre-line' }}>
+          agentx.eth
+        </p>
+      </div>
       <div className="grid">{loggedIn ? loggedInView : unloggedInView}</div>
 
       <footer className="footer">
