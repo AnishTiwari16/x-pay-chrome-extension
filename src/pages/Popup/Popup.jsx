@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import './Popup.css';
 import RPC from './webRPC'; // for using web3.js
 const clientId =
-  'BFW3wcM203ReRzwb2nnd4bu4vUTtwPOZ7zsjkd62YkniA5DOtjJAXzchQGT_lvcJswnlp18k__tWqAPs76mGNAI'; // get from https://dashboard.web3auth.io
+  'BMOrKGsNSuifb5MOhmMmJOrkptD_vHNpAJ54OIV684-T1BQ5ccoz4JMF6W8bkIlnw5_qaFOEDwNBVhpAwUGClQ4';
 
 function App() {
   const [web3auth, setWeb3auth] = useState(null);
@@ -40,10 +40,10 @@ function App() {
       try {
         const chainConfig = {
           chainNamespace: CHAIN_NAMESPACES.EIP155,
-          chainId: '0x1', // Please use 0x1 for Mainnet
-          rpcTarget: 'https://rpc.ankr.com/eth',
-          displayName: 'Ethereum Mainnet',
-          blockExplorerUrl: 'https://etherscan.io/',
+          chainId: '0xafa',
+          rpcTarget: 'https://rpc-holesky.morphl2.io',
+          displayName: 'Morph Holesky',
+          blockExplorerUrl: 'https://explorer-holesky.morphl2.io',
           ticker: 'ETH',
           tickerName: 'Ethereum',
           logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png',

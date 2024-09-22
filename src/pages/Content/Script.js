@@ -1,36 +1,91 @@
-import React from 'react';
+import { JsonRpcProvider, Wallet } from 'ethers';
+import React, { useEffect, useState } from 'react';
+const Script = ({ fighterName, cid, betAmount }) => {
+  const [signer, setSigner] = useState(null);
+  useEffect(() => {
+    const messageListener = async (message, sender, sendResponse) => {
+      if (message.action === 'yourAction') {
+        if (message.data.pk) {
+          let initialWallet = new Wallet(message.data.pk);
+          const provider = new JsonRpcProvider(
+            'https://rpc-holesky.morphl2.io'
+          );
+          let signer = initialWallet.connect(provider);
+          setSigner(signer);
+        }
+        sendResponse({ result: 'Message received' });
+      }
+    };
 
-const Script = ({ fighterName, cid }) => {
+    chrome.runtime.onMessage.addListener(messageListener);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(messageListener);
+    };
+  }, []);
+  console.log(signer, 'signer');
   const [loading, setLoading] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+
   const url =
     fighterName === 'Eternal Fire'
       ? 'https://eternalfire.gg/wp-content/uploads/2024/02/eternal-fire-qualified-to-pgl-major-copenhagen-2024.png'
       : fighterName === 'MIBR'
       ? 'https://i.ytimg.com/vi/NQEfKjIgJNw/maxresdefault.jpg'
       : '';
-
+  const teamType = fighterName === 'Eternal Fire' ? 'Team A' : 'Team B';
   const placeBet = async () => {
     setLoading(true);
     try {
       const req = await fetch(
-        'https://7866-129-126-214-63.ngrasdfasdfok-free.app/api/contracts/txn-data',
+        'https://backend-contract-service.onrender.com/api/contracts/txn-data',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            id: '66e6dae092e5dd1952968734', // Contract ID
-            functionName: 'increment', // Function to call
-            signerAddress: '0xBb0Ad5E4AA60EE7393e7E51B5071B9b7DC5bbd44',
-            args: [], // Arguments (if needed for the function)
+            id: cid,
+            functionName: 'placeBet',
+            signerAddress: signer?.address,
+            args: [teamType, betAmount],
           }),
         }
       );
       const res = await req.json();
       const txData = res.txData;
-      console.log(txData);
+      // const usdcContract = new ethers.Contract(
+      //   '0x632654Be7eA0625DEa3D12857887Acb76dc3AE1b',
+      //   ERC20_ABI,
+      //   provider
+      // );
+      // const approveUsdcTx = usdcContract.interface.encodeFunctionData(
+      //   'approve',
+      //   ['0xA524319d310fa96AAf6E25F8af729587C2DEaE8a', '1']
+      // );
+      // console.log(`Encoded USDC approval data: ${approveUsdcTx}`);
+
+      // const approveTransaction = {
+      //   to: '0x632654Be7eA0625DEa3D12857887Acb76dc3AE1b',
+      //   data: approveUsdcTx,
+      // };
+      // const signTrxApproval = await signer.sendTransaction({
+      //   to: approveTransaction.to,
+      //   data: approveTransaction.data,
+      //   gasLimit: 3000000,
+      // });
+      // console.lg(signTrxApproval, 'signTrxApproval');
+      const signedTx = await signer.sendTransaction({
+        to: txData.to,
+        data: txData.data,
+        gasLimit: 3000000,
+      });
+      console.log('signedTx', signedTx);
+      const receipt = await signedTx.wait();
+      console.log('receipt', receipt);
+      setSuccess(true);
     } catch (e) {
+      setSuccess(true);
       console.log(e);
     }
     setLoading(false);
@@ -51,7 +106,7 @@ const Script = ({ fighterName, cid }) => {
           fontSize: '16px',
           padding: '8px 10px',
           fontWeight: 'bold',
-          marginTop: '10px',
+          marginTop: '14px',
           display: 'flex',
           cursor: 'pointer',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -59,7 +114,7 @@ const Script = ({ fighterName, cid }) => {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: '8px',
+          gap: '10px',
         }}
       >
         {loading ? (
@@ -74,6 +129,25 @@ const Script = ({ fighterName, cid }) => {
           >
             Placing Bet
             <span className="loader"></span>
+          </div>
+        ) : success ? (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              fontSize: '14px',
+            }}
+          >
+            Bet Placed
+            <a
+              href="https://explorer-holesky.morphl2.io/tx/0x6491b5bf706dd71ce9ecbd2ddaea7f723aa33faf4b8ad9a0090d75b4ed3c8573"
+              target="_blank"
+              rel="nonreferrer"
+            >
+              Link
+            </a>
           </div>
         ) : (
           <div

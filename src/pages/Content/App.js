@@ -126,7 +126,6 @@ const App = ({ render }) => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };
   }, []);
-
   const signMessage = async () => {
     const req = await fetch(
       'https://7866-129-126-214-63.ngrok-free.app/api/contracts/txn-data',
